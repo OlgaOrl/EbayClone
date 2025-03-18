@@ -1,0 +1,347 @@
+openapi: 3.0.0
+info:
+  title: EbayClone API (ET)
+  version: "1.0.0"
+  description: |
+    See API võimaldab hallata eBay sarnast turuplatvormi. Kõik lõpp-punktid on dokumenteeritud.
+servers:
+  - url: http://localhost:3000
+
+tags:
+  - name: "Kasutajad"
+    description: "Kasutajate haldus"
+  - name: "Kuulutused"
+    description: "Kuulutuste haldus"
+  - name: "Tellimused"
+    description: "Tellimuste haldus"
+
+paths:
+  /users:
+    post:
+      tags:
+        - "Kasutajad"
+      summary: "Loo kasutaja"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: "kasutaja1"
+                email:
+                  type: string
+                  example: "kasutaja1@mail.com"
+                password:
+                  type: string
+                  example: "salajane"
+      responses:
+        '201':
+          description: "Kasutaja loodud"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  username:
+                    type: string
+                    example: "kasutaja1"
+                  email:
+                    type: string
+                    example: "kasutaja1@mail.com"
+        '400':
+          description: "Vigane taotlus"
+
+  /users/login:
+    post:
+      tags:
+        - "Kasutajad"
+      summary: "Logi sisse"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: "kasutaja1@mail.com"
+                password:
+                  type: string
+                  example: "salajane"
+      responses:
+        '200':
+          description: "Sisselogimine õnnestus"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: "jwt-token-here"
+        '401':
+          description: "Vale volitused"
+        '400':
+          description: "Vigane taotlus"
+
+  /users/{id}:
+    get:
+      tags:
+        - "Kasutajad"
+      summary: "Hangi kasutaja"
+      parameters:
+        - in: path
+          name: id
+          description: "Kasutaja ID"
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '200':
+          description: "Kasutaja andmed"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  username:
+                    type: string
+                    example: "kasutaja1"
+                  email:
+                    type: string
+                    example: "kasutaja1@mail.com"
+        '404':
+          description: "Kasutajat ei leitud"
+
+  /listings:
+    get:
+      tags:
+        - "Kuulutused"
+      summary: "Hangi kõik kuulutused"
+      responses:
+        '200':
+          description: "Kuulutuste loetelu"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    title:
+                      type: string
+                    description:
+                      type: string
+                    price:
+                      type: number
+    post:
+      tags:
+        - "Kuulutused"
+      summary: "Loo kuulutus"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: "Uus ese"
+                description:
+                  type: string
+                  example: "Kirjeldus"
+                price:
+                  type: number
+                  example: 100.0
+      responses:
+        '201':
+          description: "Kuulutus loodud"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  title:
+                    type: string
+                    example: "Uus ese"
+                  description:
+                    type: string
+                    example: "Kirjeldus"
+                  price:
+                    type: number
+                    example: 100.0
+        '400':
+          description: "Vigane taotlus"
+
+  /listings/{id}:
+    get:
+      tags:
+        - "Kuulutused"
+      summary: "Hangi kuulutus"
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '200':
+          description: "Kuulutuse andmed"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  title:
+                    type: string
+                    example: "Ese"
+                  description:
+                    type: string
+                    example: "Kirjeldus"
+                  price:
+                    type: number
+                    example: 50
+        '404':
+          description: "Kuulutust ei leitud"
+
+  /orders:
+    get:
+      tags:
+        - "Tellimused"
+      summary: "Hangi kõik tellimused"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Tellimuste loetelu"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    userId:
+                      type: integer
+                    listingId:
+                      type: integer
+                    quantity:
+                      type: integer
+                    totalPrice:
+                      type: number
+    post:
+      tags:
+        - "Tellimused"
+      summary: "Loo tellimus"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: integer
+                  example: 1
+                listingId:
+                  type: integer
+                  example: 10
+                quantity:
+                  type: integer
+                  example: 2
+                totalPrice:
+                  type: number
+                  example: 200.0
+      responses:
+        '201':
+          description: "Tellimus loodud"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  userId:
+                    type: integer
+                  listingId:
+                    type: integer
+                  quantity:
+                    type: integer
+                  totalPrice:
+                    type: number
+        '400':
+          description: "Vigane taotlus"
+
+  /orders/{id}:
+    get:
+      tags:
+        - "Tellimused"
+      summary: "Hangi tellimus"
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '200':
+          description: "Tellimuse andmed"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  userId:
+                    type: integer
+                    example: 1
+                  listingId:
+                    type: integer
+                    example: 10
+                  quantity:
+                    type: integer
+                    example: 2
+                  totalPrice:
+                    type: number
+                    example: 200.0
+        '404':
+          description: "Tellimust ei leitud"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
